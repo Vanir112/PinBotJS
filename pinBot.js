@@ -135,6 +135,8 @@ async function Help(receivedMessage) {
     else {
         if (isUsePermitted(receivedMessage.member.roles)) {
             customDescription = useHelpMsg + pinChannelStatus;
+        } else {
+            customDescription = noPermsMsg;
         }
         if (isConfigPermitted(receivedMessage.member.roles)) {
             customDescription += configHelpMsg;
@@ -175,6 +177,7 @@ async function Pin(receivedMessage) {
     let operand = receivedMessage.content.trim();
     let pinGuildMember = receivedMessage.guild.members.get(receivedMessage.author.id) || await receivedMessage(receivedMessage.author.id, true);
 
+    console.log(pinGuildMember.roles);
     if (isUsePermitted(pinGuildMember.roles) || pinGuildMember.hasPermission('ADMINISTRATOR')) {
         let pinMessage = null;
         if (!isNaN(operand) && operand.length == 18) {
@@ -451,11 +454,19 @@ function setCmdPrefix(guildID, newPrefix) {
 }
 
 function isUsePermitted(userRoles) {
-    let crossover = userRoles.filter(Set.prototype.has, new Set(botConfig["permittedUseRoles"]))
-    return crossover.length != 0
+    //let crossover = userRoles.filter(Set.prototype.has, new Set(botConfig["permittedUseRoles"]))
+    //return crossover.length != 0
+    var result = false;
+    userRoles.some(element => {
+        if (isRoleUsePermitted(element.id)) {
+            result = true;
+            return true;
+        }
+    });
+    return result;
 }
 function isRoleUsePermitted(roleID) {
-    return botConfig["permittedUseRoles"].includes(roleID);
+    return botConfig.permittedUseRoles.includes(roleID);
 }
 function addUsePermitted(roleID) {
     if (!isRoleUsePermitted(roleID)) {
@@ -471,11 +482,19 @@ function removeUsePermitted(roleID) {
 }
 
 function isConfigPermitted(userRoles) {
-    let crossover = userRoles.filter(Set.prototype.has, new Set(botConfig["permittedConfigRoles"]))
-    return crossover.length != 0;
+    // let crossover = userRoles.filter(Set.prototype.has, new Set(botConfig["permittedConfigRoles"]))
+    // return crossover.length != 0;
+    var result = false;
+    userRoles.some(element => {
+        if (isRoleConfigPermitted(element.id)) {
+            result = true;
+            return true;
+        }
+    });
+    return result;
 }
 function isRoleConfigPermitted(roleID) {
-    return botConfig["permittedConfigRoles"].includes(roleID);
+    return botConfig.permittedConfigRoles.includes(roleID);
 }
 function addConfigPermitted(roleID) {
     if (!isRoleConfigPermitted(roleID)) {
